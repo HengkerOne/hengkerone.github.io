@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacked Bye | HengkerOne</title>
+    
+    <style>
+        /* Variabel Warna dan Gaya Dasar */
+        :root {
+            --bg-color: #111;
+            --text-color: #a6e22e;
+            --highlight-color: #66d9ef;
+            --keyword-color: #66d9ef;
+            --comment-color: #75715e;
+            --border-color: #333;
+            --panel-bg: #1e1e1e; /* Latar belakang untuk panel box */
+            /* Tambahan untuk mode Tab/Page */
+            --max-panel-height: 750px; /* Batasan tinggi panel */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            line-height: 1.5;
+            margin: 0;
+            font-size: 14px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- STYLING PANEL BOX BARU --- */
+        .panel-box {
+            max-width: 900px;
+            width: 100%;
+            background-color: var(--panel-bg);
+            /* Catatan: Garis kotak luar tetap ada sebagai bingkai utama */
+            border: 2px solid var(--keyword-color); 
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(102, 217, 239, 0.7);
+            padding: 0;
+            margin: 20px;
+            /* Tambahan: Batasi tinggi dan aktifkan scroll internal jika konten terlalu banyak */
+            max-height: var(--max-panel-height); 
+            overflow: hidden; /* Sembunyikan scrollbar utama */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Konten utama yang akan di-scroll secara internal */
+        main {
+            padding: 15px 25px;
+            margin: 0;
+            max-width: none;
+            border-left: none; 
+            padding-left: 0; 
+            /* Tambahan: Aktifkan scroll hanya pada area konten */
+            overflow-y: auto; 
+            flex-grow: 1; /* Biarkan main mengambil sisa ruang */
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0 10px 0;
+            /* BARU: Garis di bawah header dihapus */
+            border-bottom: none; 
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+        
+        h1 {
+            color: var(--highlight-color);
+            font-size: 2em; 
+            text-shadow: 0 0 5px var(--highlight-color);
+        }
+        
+        /* Navigasi */
+        nav {
+            margin: 0 auto;
+            max-width: 100%;
+            text-align: center;
+            /* BARU: Garis di bawah navigasi dihapus */
+            border-bottom: none; 
+            padding-bottom: 10px;
+            flex-shrink: 0;
+        }
+        
+        .menu-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .menu-item {
+            display: inline-block;
+            padding: 8px 10px;
+            /* BARU: Garis vertikal pemisah antar menu item dihapus */
+            border-right: none; 
+        }
+        .menu-item:last-child {
+            /* BARU: Garis vertikal pemisah antar menu item dihapus */
+            border-right: none;
+        }
+
+        .menu-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s, text-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .menu-link.active {
+            color: var(--highlight-color);
+            text-shadow: 0 0 5px var(--highlight-color);
+            border-bottom: 2px solid var(--highlight-color);
+        }
+
+        .menu-link:not(.active):hover {
+            color: var(--keyword-color);
+            text-shadow: 0 0 5px var(--keyword-color);
+        }
+
+
+        /* Struktur Konten (Tab Content) */
+        h2 {
+            color: var(--keyword-color);
+            /* BARU: Garis di bawah H2 dihapus */
+            border-bottom: none; 
+            padding-bottom: 5px;
+            margin-top: 25px;
+            font-size: 1.4em;
+        }
+        
+        /* CSS penting untuk fungsionalitas Tab/Halaman */
+        .content-section {
+            display: none; /* Sembunyikan semua seksi secara default */
+        }
+
+        .content-section.active {
+            display: block; /* Tampilkan seksi yang aktif */
+        }
+
+        .profile-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid var(--keyword-color);
+            object-fit: cover;
+            box-shadow: 0 0 10px var(--keyword-color);
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        main li::before { 
+            content: "$ > ";
+            color: var(--highlight-color);
+            font-weight: bold;
+        }
+        
+        a {
+            color: var(--keyword-color);
+            text-decoration: none;
+        }
+        a:hover {
+            color: var(--highlight-color);
+            text-decoration: underline;
+        }
+
+        .section-content {
+            padding: 10px 0;
+            margin-bottom: 15px;
+            /* BARU: Garis di atas konten seksi dihapus */
+            border-top: none; 
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 10px 20px;
+            /* BARU: Garis di atas footer dihapus */
+            border-top: none; 
+            color: var(--comment-color);
+            font-size: 0.75em;
+            flex-shrink: 0;
+        }
+        
+        /* MEDIA QUERY: Optimasi untuk layar yang sangat kecil (ponsel) */
+        @media (max-width: 600px) {
+            .panel-box {
+                margin: 10px;
+            }
+            main {
+                padding: 10px 15px;
+            }
+        }
+        
+    </style>
+</head>
+
+<body>
+
+    <div class="panel-box">
+        
+        <header>
+            <img src="https://i.imgur.com/oM1oOzh.jpeg" alt="Cyber Security Profile Icon" class="profile-img">
+            <h1>ACCESS GRANTED</h1>
+            <p class="company-name">NINJA TOOLKIT & CYBER DEFENDER</p>
+        </header>
+
+        <nav>
+            <ul class="menu-list">
+                <li class="menu-item">
+                    <a href="#" class="menu-link active" data-target="tentang">NINJA TOOLKIT</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link" data-target="keahlian">SKILLS DIGITAL</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link" data-target="pengalaman">DATA HACKED</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link" data-target="portofolio">OPEN SOURCE</a>
+                </li>
+            </ul>
+        </nav>
+        
+        <main>
+            <section id="tentang" class="content-section active">
+                <h2>Ninja Toolkit Developers</h2>
+                <div class="section-content">
+                    <p>
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom
+the Software is furnished to do so, subject to the following
+conditions:
+
+THE SOFTWARE IS PROVIDED "HENGKERONE", WITHOUT WARRANTY OF ANY KIND.
+</p>
+                </div>
+            </section>
+            
+            <section id="keahlian" class="content-section">
+                <h2>THE BEST SCRIPT KIDDIE </h2>
+                <div class="section-content">
+                    <p>Yah script kiddie sekali lagi script kiddie - apa yang saya sukai itu yang akan saya kerjaan untuk lebih mengetahui dari rasa penasaran saya di dunia teknologi system.</p>
+                </div>
+            </section>
+            
+            <section id="pengalaman" class="content-section">
+                <div class="section-content">
+                    <style>
+    .system-report-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        margin: 20px 0;
+    }
+    .system-report-table th, .system-report-table td {
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        text-align: left;
+    }
+    .system-report-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        width: 30%;
+    }
+    .status-operational {
+        background-color: #d4edda;
+        color: #155724;
+        font-weight: bold;
+        text-align: center !important;
+    }
+    /* STYLING BARU UNTUK HEADER PANEL */
+    .header-panel {
+        background-color: #343a40 !important; /* Abu-abu gelap (Dark Gray) */
+        color: white !important; /* Teks Putih untuk kontras */
+        text-align: center;
+        font-size: 16px;
+    }
+    /* Warna merah untuk teks yang ditekankan */
+    .red-text {
+        color: red !important;
+        font-weight: bold;
+    }
+</style>
+
+<div class="system-report-container">
+    <h2>Laporan Status Sistem Pertahanan Udara (Air Defense System)</h2>
+    <table class="system-report-table">
+        <thead>
+            <tr>
+                <th colspan="2" class="header-panel">INFORMASI DASAR SISTEM</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Nama Sistem</th>
+                <td>Iron Dome</td>
+            </tr>
+            <tr>
+                <th>Jenis Sistem</th>
+                <td>Short-Range Air Defense</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td class="status-operational">Operational</td>
+            </tr>
+            <tr>
+                <th>Detail Status</th>
+                <td>Siaga aktif, 92% intersepsi sukses dalam 30 hari terakhir.</td>
+            </tr>
+            <tr>
+                <th>Lokasi</th>
+                <td class="red-text"><strong>Israel - Northern Command (Sector A1)</strong></td>
+            </tr>
+            <tr>
+                <th>Koordinat Geo</th>
+                <td class="red-text">32.0833° N, 34.8000° E</td>
+            </tr>
+            <tr>
+                <th>Pabrikan</th>
+                <td>Rafael Advanced Defense Systems</td>
+            </tr>
+            <tr>
+                <th>Tanggal Deploy</th>
+                <td>2011-03-27</td>
+            </tr>
+            <tr>
+                <th colspan="2" class="header-panel" style="background-color: #6c757d;">METRIK KINERJA</th>
+            </tr>
+            <tr>
+                <th>Tingkat Intersepsi Sukses</th>
+                <td>92.4%</td>
+            </tr>
+            <tr>
+                <th>Jangkauan (km)</th>
+                <td>70</td>
+            </tr>
+            <tr>
+                <th>Batas Ketinggian (km)</th>
+                <td>10</td>
+            </tr>
+            <tr>
+                <th>Aktivitas Terbaru</th>
+                <td>Intersepsi 6 roket (2025-08-11), 1 uji sistem.</td>
+            </tr>
+            <tr>
+                <th colspan="2" class="header-panel" style="background-color: #6c757d;">DETAIL TEKNIS & LOGISTIK</th>
+            </tr>
+            <tr>
+                <th>Versi Saat Ini</th>
+                <td>3.9.1</td>
+            </tr>
+            <tr>
+                <th>Unit Operator</th>
+                <td>IDF Air Defense Command</td>
+            </tr>
+            <tr>
+                <th>Terintegrasi dengan</th>
+                <td>C2 Command Center, Elta Radar ELM-2084</td>
+            </tr>
+            <tr>
+                <th>Sistem Radar Terkait</th>
+                <td>ELM-2084, Green Pine</td>
+            </tr>
+            <tr>
+                <th>Status Jaringan</th>
+                <td>Encrypted Link - Active</td>
+            </tr>
+            <tr>
+                <th>Status Daya</th>
+                <td>ON GRID</td>
+            </tr>
+            <tr>
+                <th>Pemeliharaan Terakhir</th>
+                <td>2025-07-25</td>
+            </tr>
+            <tr>
+                <th>Pemeliharaan Selanjutnya (Jatuh Tempo)</th>
+                <td>2025-08-25</td>
+            </tr>
+            <tr>
+                <th>Tingkat Ancaman</th>
+                <td>High</td>
+            </tr>
+            <tr>
+                <th>Terakhir Diperbarui</th>
+                <td>2025-10-05 11:18:07</td>
+            </tr>
+        </tbody>
+    </table>
+    <div style="margin-top: 20px; text-align: center;">
+    <p>
+        <a href="" target="_blank" style="font-weight: bold; color: #007bff; text-decoration: none;">
+            🗺️ Lihat Lokasi Sistem di Peta (32.0833° N, 34.8000° E)
+        </a>
+    </p>
+</div>
+</div>
+                </div>
+            </section>
+            
+            <section id="portofolio" class="content-section">
+                <h2>PROJECTS SEPUTAR ALAT OPEN SOURCE FREE AKSES</h2>
+                <div class="section-content">
+                    <p>
+                        Akses ke semua proyek dan Tools Open Source yang dikembangkan. 
+                        Laporan Black Box dan Kode sumber tersedia di: 
+                        <a href="https://github.com/HengkerOne" target="_blank" style="font-weight: bold; color: var(--highlight-color);">
+                            https://github.com/HengkerOne 
+                        </a>
+                        // Kontribusi terbuka dan dipersilakan.
+                    </p>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>// [SYSTEM STATUS: ONLINE] // END OF FILE. &copy; <time datetime="2025">2025</time> // ALL RIGHTS RESERVED.</p>
+        </footer>
+        
+    </div>
+
+    <script>
+        function showContent(targetId) {
+            // Sembunyikan semua konten seksi
+            const contents = document.querySelectorAll('.content-section');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Tampilkan konten yang diminta
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+                
+                // Pastikan tampilan di scroll ke atas (untuk menghindari sisa scroll dari tab sebelumnya)
+                document.querySelector('main').scrollTop = 0;
+            }
+
+            // Hapus status 'active' dari semua tautan
+            const links = document.querySelectorAll('.menu-link');
+            links.forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Tambahkan status 'active' ke tautan yang diklik
+            const clickedLink = document.querySelector(`.menu-link[data-target="${targetId}"]`);
+            if (clickedLink) {
+                clickedLink.classList.add('active');
+            }
+        }
+
+        // Tambahkan event listener ke setiap tautan
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Mencegah aksi link default (misal, scroll ke atas)
+                const target = this.getAttribute('data-target');
+                showContent(target);
+            });
+        });
+
+        // Tampilkan konten pertama saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+             showContent('tentang');
+        });
+    </script>
+</body>
+</html>
